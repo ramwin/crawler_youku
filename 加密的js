@@ -1,0 +1,77 @@
+function query(keywords, type) {
+    // 如果是输入的网址
+    if (keywords.indexOf("v.youku.com") != -1 || keywords.indexOf("www.tudou.com") != -1) {
+        window.location.href = "/vr_keyword/id_" + (keywords);
+        return
+    }
+    ;if ((keywords.indexOf("http://") != -1 && keywords.indexOf("v.youku.com") == -1) && (keywords.indexOf("http://") != -1 && keywords.indexOf("www.tudou.com") == -1)) {
+        alert("请输入正确的地址!");
+        return
+    }
+    ;if (keywords.substring(keywords.length - 1, keywords.length) == ",")   // 去除最后的逗号
+        keywords = keywords.substring(0, keywords.length - 1);
+    if (keywords == "" || keywords == "输入节目名称" || keywords == "输入节目名称, 以逗号分隔进行对比") {    // 去除空的搜索
+        alert('请输入关键词!');
+        return false
+    }
+    ;var sidStr = "";
+    $.each($(".proWord"), function(i, n) {  // 没有找到 proWord, 估计是继续搜索用的。
+        var $cr = $(n);
+        var title = $cr.val().split(",")[0];
+        var sid = $cr.val().split(",")[1];
+        var wordArray = keywords.split(",");
+        for (var j = 0; j < wordArray.length; j++) {
+            if (jQuery.trim(wordArray[j]) == title) {
+                if (sidStr.indexOf(sid) == -1) {
+                    sidStr = sidStr + sid + ","
+                }
+            }
+        }
+    });
+    if (sidStr != "") { // 
+        sidStr = sidStr.substring(0, sidStr.length - 1)
+    }
+    ;var basewords = "";
+    var reg0 = new RegExp("，","g");
+    keywords = keywords.replace(reg0, ","); // 去掉中文的逗号
+    var words = keywords.split(",");
+    for (var i = 0; i < words.length; i++) {
+        var titleTmp = jQuery.trim(words[i]);
+        if (titleTmp.indexOf("）") > -1) {
+            titleTmp = titleTmp.substring(0, titleTmp.length - 6);
+        }
+        ;word = Base64.encode(titleTmp);
+        basewords += word + ","
+    }
+    ;var reg = new RegExp("\\+","g");
+    var reg2 = new RegExp("\\=","g");
+    var reg3 = new RegExp("\\/","g");
+    basewords = basewords.replace(reg, "%252b");
+    basewords = basewords.replace(reg2, "%253d");
+    basewords = basewords.replace(reg3, "%252f");
+    var tag = "";
+    if (type != null  && typeof (type) != "undefined") {
+        tag = type
+    }
+    ;var index = 0;
+    $.each($("#change_tab").children("li"), function(i, n) {
+        var $cr = $(n);
+        if ($cr.hasClass("current")) {
+            index = i
+        }
+    });
+    if (index == 2) {
+        tag = "tudou"
+    }
+    ;if (index == 1) {
+        tag = "youku"
+    }
+    ;if (tag == null  || tag == "") {
+        tag = "alldata"
+    }
+    ;var redirectUrl = "/vr_keyword/id_" + basewords.substring(0, basewords.length - 1) + "?type=" + tag;
+    if (sidStr != "") {
+        redirectUrl = redirectUrl + "&sids=" + sidStr
+    }
+    ;window.location.href = redirectUrl
+}

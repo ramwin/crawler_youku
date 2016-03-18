@@ -1,0 +1,86 @@
+122 id_MTIy
+212 id_MjEy
+221 id_MjIx
+22212   id_MjIyMTI%253d
+22222   id_MjIyMjI%253d
+22223   id_MjIyMjM%253d
+11111   id_MTExMTE%253d
+
+a   id_YQ%253d%253d
+b   id_Yg%253d%253d
+c   id_Yw%253d%253d
+
+加密流程
+    获取数据    var keywords = jQuery('#indexQuery').val();
+    调用函数    svquery(keywords);
+    
+    function svquery(keywords) {
+    if (keywords == "" || keywords == "输入节目名称或视频网址查询" || 
+        keywords == "输入节目名称,多节目对比以逗号分隔,或输入视频的网址查询。") {
+        return  // 避免默认的查询
+    };query(keywords)
+    }
+    
+    处理字符串   query(keywords);
+    function query(keywords, type) {
+    var sidStr = "";
+    $.each($(".proWord"), function(i, n) {
+        var $cr = $(n);
+        var title = $cr.val().split(",")[0];
+        var sid = $cr.val().split(",")[1];
+        var wordArray = keywords.split(",");
+        for (var j = 0; j < wordArray.length; j++) {
+            if (jQuery.trim(wordArray[j]) == title) {
+                if (sidStr.indexOf(sid) == -1) {
+                    sidStr = sidStr + sid + ","
+                }
+            }
+        }
+    });
+    if (sidStr != "") {
+        sidStr = sidStr.substring(0, sidStr.length - 1)
+    }
+    ;var basewords = "";
+    var reg0 = new RegExp("，","g");
+    keywords = keywords.replace(reg0, ",");
+    var words = keywords.split(",");
+    for (var i = 0; i < words.length; i++) {
+        var titleTmp = jQuery.trim(words[i]);
+        if (titleTmp.indexOf("）") > -1) {
+            titleTmp = titleTmp.substring(0, titleTmp.length - 6);
+        }
+        ;word = Base64.encode(titleTmp);
+        basewords += word + ","
+    }
+    ;var reg = new RegExp("\\+","g");
+    var reg2 = new RegExp("\\=","g");
+    var reg3 = new RegExp("\\/","g");
+    basewords = basewords.replace(reg, "%252b");
+    basewords = basewords.replace(reg2, "%253d");
+    basewords = basewords.replace(reg3, "%252f");
+    var tag = "";
+    if (type != null  && typeof (type) != "undefined") {
+        tag = type
+    }
+    ;var index = 0;
+    $.each($("#change_tab").children("li"), function(i, n) {
+        var $cr = $(n);
+        if ($cr.hasClass("current")) {
+            index = i
+        }
+    });
+    if (index == 2) {
+        tag = "tudou"
+    }
+    ;if (index == 1) {
+        tag = "youku"
+    }
+    ;if (tag == null  || tag == "") {
+        tag = "alldata"
+    }
+    ;var redirectUrl = "/vr_keyword/id_" + basewords.substring(0, basewords.length - 1) + "?type=" + tag;
+    if (sidStr != "") {
+        redirectUrl = redirectUrl + "&sids=" + sidStr
+    }
+    ;window.location.href = redirectUrl
+}

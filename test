@@ -1,0 +1,22 @@
+function query(keywords, type) {
+    var keywords="少帅"
+    var basewords = "";
+        var titleTmp = '少帅';
+        word = Base64.encode(titleTmp);
+        word = '5bCR5biF';
+        basewords += word + ","
+        basewords = '5bCR5biF'
+    ;var reg = new RegExp("\\+","g");
+    var reg2 = new RegExp("\\=","g");
+    var reg3 = new RegExp("\\/","g");
+    basewords = basewords.replace(reg, "%252b");
+    basewords = basewords.replace(reg2, "%253d");
+    basewords = basewords.replace(reg3, "%252f");
+    var tag = "";
+    tag = "alldata";
+    var redirectUrl = "/vr_keyword/id_" + basewords.substring(0, basewords.length - 1) + "?type=" + tag;
+    if (sidStr != "") {
+        redirectUrl = redirectUrl + "&sids=" + sidStr
+    }
+    ;window.location.href = redirectUrl
+}
