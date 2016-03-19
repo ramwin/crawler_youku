@@ -27,6 +27,7 @@ logging.warning('记录warning')
 logging.warning('爬虫脚本启动')
 
 def wxprint(text):
+    return 0
     print(text)
 
 def crawl_web(url):
@@ -207,7 +208,8 @@ def test():
     html = file.read()
     raw_data = parse_data(html)
     data = convert_data(raw_data)
-    print(data)
+    print(len(str(data)))
+    wxprint(data)
 
     
 if __name__ == '__main__':
