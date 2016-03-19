@@ -1,0 +1,6 @@
+爬取的name存储在redis数据库
+    sadd channelname '节目一' '节目二' '节目三'
+已经爬取的name存储在redis数据库
+    sadd channelname:gotten '节目一' '节目二' 
+爬取失败了的name存储在redis数据库
+    sadd channelname:failed '节目一' '节目二'
