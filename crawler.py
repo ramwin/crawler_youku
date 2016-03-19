@@ -12,9 +12,10 @@ logging.basicConfig(level=logging.DEBUG,
                 filename='./log/log.log',
                 filemode='w')
     
-logging.debug('This is debug message')
-logging.info('This is info message')
-logging.warning('This is warning message')
+logging.debug('记录debug')
+logging.info('记录info')
+logging.warning('记录warning')
+logging.warning('爬虫脚本启动')
 
 def crawl_web(url):
     ''' 输入: url 

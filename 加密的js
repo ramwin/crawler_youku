@@ -1,4 +1,5 @@
 function query(keywords, type) {
+    // 之前以为是加密，仔细看了源码发现，原来只是编码了一下
     // 如果是输入的网址
     if (keywords.indexOf("v.youku.com") != -1 || keywords.indexOf("www.tudou.com") != -1) {
         window.location.href = "/vr_keyword/id_" + (keywords);
