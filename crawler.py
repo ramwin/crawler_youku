@@ -28,7 +28,7 @@ def create_url(word):
 def convert_data(html):
     state = authenticate(html)
     if state:
-        
+        return True
     else:
         return None
 
