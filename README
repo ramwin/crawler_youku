@@ -1,0 +1,5 @@
+pip install -r requirements.txt
+
+git clone git@github.com:ramwin/crawler_youku.git
+
+./crawler.py
