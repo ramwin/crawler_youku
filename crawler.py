@@ -4,9 +4,14 @@
 
 
 import logging
-import time, requests, re, json, datetime
+import time, requests, re, json, datetime, sqlite3
 import redis
 import base64
+
+# sqlite 配置
+SQLITE_FILE = './crawler.db'
+global conn
+conn = sqlite3.connect(SQLITE_FILE)
 
 # Redis 数据库配置
 REDIS_HOST = '192.168.1.111'
@@ -15,12 +20,13 @@ REDIS_DB = 0
 CHANNELNAME_DB = 'channelname'
 CHANNELNAME_GOTTEN_DB = 'channelname:gotten'
 
+# logging 配置
 logging.basicConfig(level=logging.DEBUG,
                 format='%(asctime)s %(filename)s[line:%(lineno)d] %(levelname)s %(message)s',
                 datefmt='%a, %d %b %Y %H:%M:%S',
                 filename='./log/log.log',
-                filemode='w')
-    
+                filemode='a')
+
 logging.debug('记录debug')
 logging.info('记录info')
 logging.warning('记录warning')
@@ -29,6 +35,35 @@ logging.warning('爬虫脚本启动')
 def wxprint(text):
     return 0
     print(text)
+
+class value:
+    def __init__(self, name, date, datatype, value):
+        ''' datatype: "search" or "play"'''
+        self.name = name
+        self.date = date
+        self.datatype = datatype
+        self.value = value
+    def save(self):
+        '''INSERT INTO table_play (time, amounts, channel_id) VALUES ("2015-01-02", 15478, 678);'''
+        wxprint('save函数')
+        global conn
+        try:
+            command1 = 'SELECT ID FROM channel where name = "%s"'%(self.name)
+            wxprint(command1)
+            ID = conn.execute(command1).fetchone()
+            if ID:
+                ID = ID[0]
+                wxprint('ID获取')
+                command2 = '''INSERT INTO {0} (time, amounts, channel_id) VALUES ("{1}", {2}, {3})'''.format(self.datatype,self.date,self.value,ID)
+                conn.execute(command2)
+                r = redis.StrictRedis(host=REDIS_HOST,port=REDIS_PORT,db=REDIS_DB)
+                r.sadd('channelname:gotten',self.name)
+        except Exception as e:
+            conn = sqlite3.connect(SQLITE_FILE)
+            logging.error(e)
+            r = redis.StrictRedis(host=REDIS_HOST,port=REDIS_PORT,db=REDIS_DB)
+            r.sadd('channelname:failed', self.name)
+            logging.error('无法存入数据')
 
 def crawl_web(url):
     ''' 输入: url 
@@ -179,6 +214,15 @@ def get_data(word):
 
 def save_data(name, data):
     ''' 把爬取的数据保存下来 '''
+    global conn
+    for i in data['vv']:
+        instance = value(name,i[0], 'table_play', i[1])
+        instance.save()
+    for i in data['search']:
+        instance = value(name, i[0], 'table_search', i[1])
+        instance.save()
+    conn.commit()
+    
 
 def pop_name():
     ''' 每次输出一个需要的节目名字 
@@ -195,6 +239,7 @@ def main():
     except:
         logging.error('无法从数据库获取数据')
         return 0
+    name_map = ['地上地下']
     for i in name_map:
         if (not i in name_gotten) and (not i in name_failed):
             data = get_data(name)
@@ -204,12 +249,11 @@ def main():
 def test():
     # url = create_url('还珠格格')
     # html = crawl_web(url)
-    file = open('./html','r')
-    html = file.read()
-    raw_data = parse_data(html)
-    data = convert_data(raw_data)
-    print(len(str(data)))
-    wxprint(data)
+    # file = open('./html','r')
+    # html = file.read()
+    # raw_data = parse_data(html)
+    # data = convert_data(raw_data)
+    # save_data('少帅',data)
 
     
 if __name__ == '__main__':

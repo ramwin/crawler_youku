@@ -1,0 +1,34 @@
+BEGIN;
+--
+-- Create model channel
+--
+
+CREATE TABLE "channel" (
+    "id" integer NOT NULL PRIMARY KEY AUTOINCREMENT, 
+    "name" varchar(32) NOT NULL UNIQUE);
+
+--
+-- Create model play
+--
+
+CREATE TABLE "play" (
+    "id" integer NOT NULL PRIMARY KEY AUTOINCREMENT, 
+    "time" date NOT NULL, 
+    "amounts" integer NOT NULL, 
+    "channel_id" integer NOT NULL REFERENCES "channel" ("id"));
+
+--
+-- Create model search
+--
+
+CREATE TABLE "search" (
+    "id" integer NOT NULL PRIMARY KEY AUTOINCREMENT, 
+    "time" date NOT NULL,
+    "amounts" integer NOT NULL, 
+    "channel_id" integer NOT NULL REFERENCES "channel" ("id"));
+
+CREATE INDEX "play_72eb6c85" ON "play" ("channel_id");
+CREATE INDEX "search_72eb6c85" ON "search" ("channel_id");
+
+COMMIT;
+
