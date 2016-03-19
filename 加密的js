@@ -28,14 +28,14 @@ function query(keywords, type) {
             }
         }
     });
-    if (sidStr != "") { // 
+    if (sidStr != "") { // 删除最后一个多余的逗号
         sidStr = sidStr.substring(0, sidStr.length - 1)
     }
     ;var basewords = "";
     var reg0 = new RegExp("，","g");
     keywords = keywords.replace(reg0, ","); // 去掉中文的逗号
     var words = keywords.split(",");
-    for (var i = 0; i < words.length; i++) {
+    for (var i = 0; i < words.length; i++) {    // 去掉年份
         var titleTmp = jQuery.trim(words[i]);
         if (titleTmp.indexOf("）") > -1) {
             titleTmp = titleTmp.substring(0, titleTmp.length - 6);
