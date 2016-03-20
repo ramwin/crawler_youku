@@ -4,3 +4,8 @@
     sadd channelname:gotten '节目一' '节目二' 
 爬取失败了的name存储在redis数据库
     sadd channelname:failed '节目一' '节目二'
+是否有数据写入redis数据库
+    setbit channel:<name> day 1 # day是采集的日期距离2010-07-01的天数 比如2010-07-02    setbit channel:<name> 1 1
+数据写入redis数据库
+    rpush channelname:search:<name> 1,2 第一个日期代表了从 2010-07-01 的天数字, 比如 2010-07-2 播放23次 就是 1,23
+    rpush channelname:play:<name> 1,2 第一个日期代表了从 2010-07-01 的天数字, 比如 2010-07-2 播放23次 就是 1,23

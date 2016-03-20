@@ -19,6 +19,8 @@ REDIS_PORT = 6379
 REDIS_DB = 0
 CHANNELNAME_DB = 'channelname'
 CHANNELNAME_GOTTEN_DB = 'channelname:gotten'
+global r
+r = redis.StrictRedis(host = REDIS_HOST, port=REDIS_PORT, db=REDIS_DB)
 
 # logging 配置
 logging.basicConfig(level=logging.DEBUG,
@@ -118,6 +120,7 @@ def parse_data(html):
             ]
         '''
     logging.debug('convert_data')
+    if re.match(r'[\s\S]*<div class="tips_info"><span class="tips_icon"></span>没有找到相关指数信息</div>[\s\S]*', html)
     pattern = re.compile(r"var allnetData = eval\('\('\+'([\s\S]+?)'\+'\)'\);")
     match = re.search(pattern,html)
     if match:
@@ -202,10 +205,14 @@ def get_data(word):
         }
         失败则返回 None
     '''
-    url = create_url(word)
-    html = crawl_web(url)
+    global r
+    file_path = os.path.join('./html',word)
+    if os.path.isfile(file_path):
+        html = open(file_path,'r').read()
+    else:
+        url = create_url(word)
+        html = crawl_web(url)
     if html:
-        file_path = os.path.join('./html',word)
         file = open(file_path,'w')
         file.write(html)
         file.close()
@@ -214,7 +221,6 @@ def get_data(word):
         data = convert_data(raw_data)
         return data
     else:
-        r = redis.StrictRedis(host=REDIS_HOST,port=REDIS_PORT,db=REDIS_DB)
         r.sadd('channelname:failed', word)
         logging.error('parse_data 失败')
         return None
@@ -229,17 +235,12 @@ def save_data(name, data):
         instance = value(name, i[0], 'search', i[1])
         instance.save()
     conn.commit()
-    
 
-def pop_name():
-    ''' 每次输出一个需要的节目名字 
-        output: <string>'''
-    return True
-    
+
 def main():
     ''' 运行的函数 '''
+    global r
     try:
-        r = redis.StrictRedis(host=REDIS_HOST, port=REDIS_PORT, db=REDIS_DB)
         name_map = map(lambda x: x.decode('utf8'), r.smembers('channelname'))
         name_gotten = map(lambda x: x.decode('utf8'), r.smembers('channelname:gotten'))
         name_failed = map(lambda x: x.decode('utf8'), r.smembers('channelname:failed'))
