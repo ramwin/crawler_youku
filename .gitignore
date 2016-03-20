@@ -3,3 +3,4 @@
 /log/*
 crawler.db
 *.swp
+/html/*

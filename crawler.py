@@ -4,7 +4,7 @@
 
 
 import logging
-import time, requests, re, json, datetime, sqlite3
+import time, requests, re, json, datetime, sqlite3, os
 import redis
 import base64
 
@@ -44,7 +44,7 @@ class value:
         self.datatype = datatype
         self.value = value
     def save(self):
-        '''INSERT INTO table_play (time, amounts, channel_id) VALUES ("2015-01-02", 15478, 678);'''
+        '''INSERT INTO play (time, amounts, channel_id) VALUES ("2015-01-02", 15478, 678);'''
         wxprint('save函数')
         global conn
         try:
@@ -204,11 +204,18 @@ def get_data(word):
     '''
     url = create_url(word)
     html = crawl_web(url)
-    raw_data = parse_data(text)
+    if html:
+        file_path = os.path.join('./html',word)
+        file = open(file_path,'w')
+        file.write(html)
+        file.close()
+    raw_data = parse_data(html)
     if raw_data:
-        data = convert_data(data)
+        data = convert_data(raw_data)
         return data
     else:
+        r = redis.StrictRedis(host=REDIS_HOST,port=REDIS_PORT,db=REDIS_DB)
+        r.sadd('channelname:failed', word)
         logging.error('parse_data 失败')
         return None
 
@@ -216,10 +223,10 @@ def save_data(name, data):
     ''' 把爬取的数据保存下来 '''
     global conn
     for i in data['vv']:
-        instance = value(name,i[0], 'table_play', i[1])
+        instance = value(name,i[0], 'play', i[1])
         instance.save()
     for i in data['search']:
-        instance = value(name, i[0], 'table_search', i[1])
+        instance = value(name, i[0], 'search', i[1])
         instance.save()
     conn.commit()
     
@@ -239,12 +246,14 @@ def main():
     except:
         logging.error('无法从数据库获取数据')
         return 0
-    name_map = ['地上地下']
-    for i in name_map:
-        if (not i in name_gotten) and (not i in name_failed):
+    for name in name_map:
+        if (not name in name_gotten) and (not name in name_failed):
             data = get_data(name)
-            save(name, data)
-            time.sleep(60)
+            if data:
+                save_data(name, data)
+            else:
+                pass
+            time.sleep(10)
 
 def test():
     # url = create_url('还珠格格')
@@ -254,7 +263,8 @@ def test():
     # raw_data = parse_data(html)
     # data = convert_data(raw_data)
     # save_data('少帅',data)
+    pass
 
     
 if __name__ == '__main__':
-    test()
+    main()
